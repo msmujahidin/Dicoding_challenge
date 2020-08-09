@@ -1,12 +1,13 @@
 from PIL import Image
 from flask import Flask, Blueprint, render_template, request, jsonify, redirect, url_for, g, session
 from torch_mtcnn import detect_faces
-
+from flask_bootstrap import Bootstrap
 from util import is_same, ModelLoaded
 
-base = Blueprint('base', __name__)
-THRESHOLD = 1.5
 
+base = Blueprint('base', __name__, template_folder='templates')
+THRESHOLD = 1.5
+# bootstrap = Bootstrap(base)
 
 
 @base.before_request
@@ -37,6 +38,11 @@ users.append(User(id=4, username='admin', password='password'))
 def index():
     return render_template('index.html')
 
+@base.route('/home')
+def home():
+    return render_template('indexx.html')
+
+
 @base.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -49,11 +55,17 @@ def login():
         if user and user.password == password:
             session['user_id'] = user.id
 
-            return redirect(url_for('base.index'))
+            return redirect(url_for('base.home'))
 
         return redirect(url_for('base.login'))
 
-    return render_template('login.html')
+    return render_template('loginn.html')
+
+
+@base.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('base.login'))
 
 @base.route('/predict', methods=['post'])
 def predict():
@@ -74,3 +86,4 @@ def predict():
                    score=distance.item(),
                    model_acc=model_acc,
                    threshold=THRESHOLD)
+
